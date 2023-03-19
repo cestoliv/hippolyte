@@ -71,7 +71,9 @@ while True:
 	print(Fore.GREEN + Style.BRIGHT)
 	text = input("> ")
 	print(Style.RESET_ALL)
-	if text == "quit" or text == "exit":
+	if text.strip() == '':
+		continue
+	elif text == "quit" or text == "exit":
 		print(Fore.BLUE + Style.BRIGHT + ASSISTANT_NAME + ' is shutting down...' + Style.RESET_ALL)
 		break
 	elif text == "index":
