@@ -22,6 +22,7 @@ from os.path import exists
 # local imports
 from prompt import create_prompt, QA_PROMPT
 from index import create_index, load_index
+from openapi import check_openai_api_key
 
 
 console = Console()
@@ -32,14 +33,13 @@ ASSISTANT_NAME = os.getenv('ASSISTANT_NAME') or 'Hippolyte'
 VERBOSE = os.getenv('VERBOSE') or False
 MODEL = os.getenv('MODEL') or 'gpt-3.5-turbo'
 
-if not os.getenv('OPENAI_API_KEY'):
-	print(Fore.RED + Style.BRIGHT + 'No OPENAI_API_KEY found in .env file' + Style.RESET_ALL)
-	exit(1)
-
 DOCUMENTS_PATH = os.getenv('DOCUMENTS_PATH')
 if not DOCUMENTS_PATH:
 	print(Fore.RED + Style.BRIGHT + 'No DOCUMENTS_PATH found in .env file' + Style.RESET_ALL)
 	exit(1)
+
+# check openai api key
+check_openai_api_key(os.getenv('OPENAI_API_KEY'))
 
 # Set global variables
 INDEX_PATH = 'indexes/index_GPTSimpleVectorIndex.json'

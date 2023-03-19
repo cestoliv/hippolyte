@@ -4,3 +4,4 @@ trials/
 .env
 
 __pycache__/
+venv
