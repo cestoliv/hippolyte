@@ -1,0 +1,6 @@
+indexes/
+trials/
+
+.env
+
+__pycache__/
