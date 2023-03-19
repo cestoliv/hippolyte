@@ -12,7 +12,7 @@ from colorama import Fore, Style
 from prompt import QA_PROMPT
 
 
-ObsidianReader = None
+ObsidianReader = download_loader('ObsidianReader')
 
 def find_relevant_sources(query_text: str, index: GPTSimpleVectorIndex, top_k=5) -> str:
 	relevant_sources = ''
@@ -32,8 +32,6 @@ def get_llm(model: str) -> ChatOpenAI | OpenAI:
 		exit(1)
 
 def create_index(documents_path: str, save_path: str, model: str) -> GPTSimpleVectorIndex:
-	if not ObsidianReader:
-		ObsidianReader = download_loader('ObsidianReader')
 	llm_predictor = LLMPredictor(llm=get_llm(model))
 
 	documents = ObsidianReader(documents_path).load_data()
