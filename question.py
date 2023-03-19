@@ -15,9 +15,9 @@ from colorama import Fore, Style
 
 # other imports
 import os
+from os.path import exists
 import readline
 from dotenv import load_dotenv
-from os.path import exists
 
 # local imports
 from prompt import create_prompt, QA_PROMPT
@@ -36,6 +36,17 @@ MODEL = os.getenv('MODEL') or 'gpt-3.5-turbo'
 DOCUMENTS_PATH = os.getenv('DOCUMENTS_PATH')
 if not DOCUMENTS_PATH:
 	print(Fore.RED + Style.BRIGHT + 'No DOCUMENTS_PATH found in .env file' + Style.RESET_ALL)
+	exit(1)
+
+# Check if documents path exists, is a directory and is not empty
+if not exists(DOCUMENTS_PATH):
+	print(Fore.RED + Style.BRIGHT + DOCUMENTS_PATH + ' does not exist' + Style.RESET_ALL)
+	exit(1)
+elif not os.path.isdir(DOCUMENTS_PATH):
+	print(Fore.RED + Style.BRIGHT + DOCUMENTS_PATH + ' is not a directory' + Style.RESET_ALL)
+	exit(1)
+elif not os.listdir(DOCUMENTS_PATH):
+	print(Fore.RED + Style.BRIGHT + DOCUMENTS_PATH + ' is empty' + Style.RESET_ALL)
 	exit(1)
 
 # check openai api key

@@ -26,4 +26,3 @@ def check_openai_api_key(openai_api_key: str):
 	if response.status_code != 200:
 		print(Fore.RED + Style.BRIGHT + 'Invalid OPENAI_API_KEY' + Style.RESET_ALL)
 		exit(1)
-	print(Fore.GREEN + Style.BRIGHT + 'OPENAI_API_KEY is valid' + Style.RESET_ALL)
