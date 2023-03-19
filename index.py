@@ -8,6 +8,9 @@ from langchain.chat_models import ChatOpenAI
 # cli imports
 from colorama import Fore, Style
 
+# other imports
+import pathlib
+
 # local imports
 from prompt import QA_PROMPT
 
@@ -34,6 +37,7 @@ def get_llm(model: str) -> ChatOpenAI | OpenAI:
 def create_index(documents_path: str, save_path: str, model: str) -> GPTSimpleVectorIndex:
 	llm_predictor = LLMPredictor(llm=get_llm(model))
 
+	pathlib.Path(save_path).parent.mkdir(parents=True, exist_ok=True)
 	documents = ObsidianReader(documents_path).load_data()
 
 	# TODO: max_token
