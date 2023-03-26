@@ -53,14 +53,26 @@ class AlpacaAnswer(BaseAnswer):
 	# 		"Answer:"
 	# 	)
 
-	def get_prompt_template(self) -> str:
+	def get_prompt_template_opinion(self) -> str:
 		return (
+			'Below is an instruction that describes a task. Write a response that appropriately completes the request.\n'
 			'Instruction: Read the given information and answer the question.\n'
 			'Bob said:\n'
 			"---------------------\n"
-			"{context_str}"
+			"{context_str}\n"
 			"---------------------\n"
 			"Question: {query_str} in Bob's opinion\n"
+			"Answer:"
+		)
+
+	def get_prompt_template(self) -> str:
+		return (
+			'Below is an instruction that describes a task. Write a response that appropriately completes the request.\n'
+			'Instruction: Read the given information and answer the question.\n'
+			"---------------------\n"
+			"{context_str}\n"
+			"---------------------\n"
+			"Question: {query_str} from the given information\n"
 			"Answer:"
 		)
 
@@ -87,9 +99,9 @@ class AlpacaAnswer(BaseAnswer):
 			[
 				self.alpaca_cpp_path + 'main',
 				'--seed', '-1',
-				'--threads', '4',
+				'--threads', '8',
 				'--n_predict', '256',
-				'--model', self.alpaca_cpp_path + 'models/7B/ggml-model-q4_0.bin',
+				'--model', '/home/cestoliv/Downloads/llama.cpp/models/ggml-model-q4_0.bin.tmp',
 				'--top_k', '40',
 				'--top_p', '0.95',
 				'--temp', '0.1',

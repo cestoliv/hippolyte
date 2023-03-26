@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from pprint import pprint
 
 from models.answer.alpaca import AlpacaAnswer
+from models.answer.bloom import BloomAnswer
 from models.answer.gpt import GPTAnswer
 from models.index.gsvindex import GSVIndex
 
@@ -36,6 +37,14 @@ if __name__ == '__main__':
 			'context': ["Here is a list of the last books i read: L'Etranger, Albert Camus; L'Institut, Stephen King; L'intelligence artificielle n'existe pas, Luc Julia; The Motivation Myth, Jeff Haden"]
 		},
 		{
+			'question': 'Make a list of the last books I\'ve read',
+			'context': ["Here is a list of the last books i read", "- L'Etranger, Albert Camus", "- L'Institut, Stephen King", "- L'intelligence artificielle n'existe pas, Luc Julia", "- The Motivation Myth, Jeff Haden"]
+		},
+		{
+			'question': 'Make a list of the last books I\'ve read',
+			'context': None
+		},
+		{
 			'question': 'How to login as local user on windows ?',
 			'context': None
 		},
@@ -47,7 +56,8 @@ if __name__ == '__main__':
 
 	models = {
 		# 'gpt': GPTAnswer('gpt-3.5-turbo', index),
-		'alpaca': AlpacaAnswer(index, '/home/cestoliv/dalai/alpaca/')
+		'alpaca': AlpacaAnswer(index, '/home/cestoliv/Downloads/llama.cpp/'),
+		# 'bloom': BloomAnswer(index, '/home/cestoliv/Downloads/bloomz.cpp/')
 	}
 
 	for question in bench_questions:
