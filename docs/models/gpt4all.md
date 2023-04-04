@@ -23,13 +23,15 @@ To test that everything is working, try to run it:
 
 You will then need to configure Hippolyte to use GPT4All, to do so, add the following to your `.env` file.
 
+(make sure to replace at least the values between <>)
+
 *(Restart the app for the changes to take effect)*
 
 ```env
 # GPT4All
 GPT4ALL_ENABLED=True
-GPT4ALL_PATH=/home/cestoliv/Downloads/llama.cpp
-GPT4ALL_MODEL_PATH=/home/cestoliv/Downloads/llama.cpp/models/gpt4all-lora-quantized.bin
+GPT4ALL_PATH=<path/to/llama.cpp>
+GPT4ALL_MODEL_PATH=<path/to/gpt4all-lora-quantized.bin>
 GPT4ALL_KEEP_IN_MEMORY=True
 ```
 

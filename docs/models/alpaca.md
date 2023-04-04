@@ -23,6 +23,8 @@ To test that everything is working, try to run it:
 
 You will then need to configure Hippolyte to use Alpaca, to do so, add the following to your `.env` file.
 
+(make sure to replace at least the values between <>)
+
 *(Restart the app for the changes to take effect)*
 
 ```env
