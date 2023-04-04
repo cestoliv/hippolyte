@@ -1,0 +1,93 @@
+/* CONTACT PANEL */
+#contacts {
+    background: #0d0d0d;
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    width: 20rem;
+    min-width: 20rem;
+    box-shadow: 0px 5px 10px #0d0d0d;
+    display: flex;
+    flex-direction: column;
+}
+
+#sodachat_logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 15px;
+}
+
+#sodachat_logo > img {
+    width: 5rem;
+}
+
+#contacts_list {
+    background-image: url(/imgs/contact_trees.svg);
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: left bottom;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+#contacts_list ul {
+    display: none;
+    padding: 0;
+    list-style-type: none;
+    margin: 0 15px;
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+}
+#contacts_list ul.showed {
+    display: block;
+}
+
+#contacts_loading {
+    display: none;
+    width: 2rem;
+    height: 2rem;
+    animation: rotate infinite .8s ease-in-out;
+    fill: #fff;
+    margin-top: 50px;
+}
+
+#contacts_loading.showed {
+    display: block;
+}
+
+#contacts_list > ul > .contact {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    cursor: pointer;
+}
+
+#contacts_list > ul > .contact:not(:last-child) {
+    margin-bottom: 20px;
+}
+
+#contacts_list > ul > .contact > img {
+    width: 3rem;
+    height: 3rem;
+}
+
+#contacts_list > ul > .contact span {
+    font-weight: bold;
+	font-size: 1.2rem;
+    color: #e0e0e0;
+	margin-left: 15px;
+    overflow: hidden;
+
+    word-break: keep-all;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: font-size .2s ease-in-out;
+}
+
+#contacts_list > ul > .contact:hover span {
+	font-size: 1.3rem;
+}

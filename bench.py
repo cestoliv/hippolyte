@@ -12,6 +12,8 @@ from pprint import pprint
 from models.answer.alpaca import AlpacaAnswer
 from models.answer.bloom import BloomAnswer
 from models.answer.gpt import GPTAnswer
+from models.answer.gpt4all import GPT4AllAnswer
+from models.answer.functions import get_models
 from models.index.gsvindex import GSVIndex
 
 load_dotenv()
@@ -20,6 +22,10 @@ if __name__ == '__main__':
 	index = GSVIndex('text-embedding-ada-002')
 
 	bench_questions = [
+		{
+			'question': 'Hello, who are you?',
+			'context': None # Will not use context
+		},
 		{
 			'question': 'What is the capital of France?',
 			'context': ['France is a country. The capital of France is Paris.']
@@ -42,34 +48,46 @@ if __name__ == '__main__':
 		},
 		{
 			'question': 'Make a list of the last books I\'ve read',
-			'context': None
+			'context': [] # Will use the index
 		},
 		{
 			'question': 'How to login as local user on windows ?',
-			'context': None
+			'context': [] # Will use the index
 		},
 		{
 			'question': 'Matrix, how to fix file not uploadind',
-			'context': None
+			'context': [] # Will use the index
 		},
 	]
 
-	models = {
-		# 'gpt': GPTAnswer('gpt-3.5-turbo', index),
-		'alpaca': AlpacaAnswer(index, '/home/cestoliv/Downloads/llama.cpp/'),
-		# 'bloom': BloomAnswer(index, '/home/cestoliv/Downloads/bloomz.cpp/')
-	}
+	# models = {
+	# 	# 'gpt': GPTAnswer('gpt-3.5-turbo', index),
+	# 	'alpaca': AlpacaAnswer(index, '/home/cestoliv/Downloads/llama.cpp/'),
+	# 	'gpt4all': GPT4AllAnswer(index, '/home/cestoliv/Downloads/gpt4all.cpp/'),
+	# 	# 'bloom': BloomAnswer(index, '/home/cestoliv/Downloads/bloomz.cpp/')
+	# }
+
+	models = get_models(index)
 
 	for question in bench_questions:
 		print('Question: ' + question['question'])
-		if question['context'] is None:
-			print('Context: ' + '\n'.join(index.sources(question['question'], 1)))
-		else:
-			print('Context: ' + '\n'.join(question['context']))
+		if question['context'] is not None:
+			if len(question['context']) > 0:
+				print('Context: ' + '\n'.join(question['context']))
+			else:
+				print('Context: ' + '\n'.join(index.sources(question['question'], 1)))
 		print()
 
 		for model_name, model in models.items():
-			print('\t Asking ' + model_name)
-			print(model.answer(question['question'], question['context'])['answer'])
+			print('\t Asking ' + model.name)
+
+			context = None
+			use_context = False
+			if question['context'] is not None:
+				if len(question['context']) > 0:
+					context = question['context']
+				use_context = True
+
+			print(model.answer(question['question'], context, use_context=use_context)['answer'])
 			print()
 		print('----------------------------------------\n')

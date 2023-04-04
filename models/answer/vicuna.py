@@ -6,36 +6,31 @@ from colorama import Fore, Style
 from models.answer.base import BaseAnswer
 from models.index.base import BaseIndex
 
-class AlpacaAnswer(BaseAnswer):
+class VicunaAnswer(BaseAnswer):
 	def __init__(self, index: BaseIndex, path: str, model_path: str, keep_in_memory: bool):
-		super().__init__('Alpaca', 'alpaca', index)
+		super().__init__('Vicuna', 'vicuna', index)
 
 		self.path = path
 		self.model_path = model_path
 		self.keep_in_memory = keep_in_memory
 
-		# Alpaca process command
+		# Vicuna process command
 		self.command = [
 			os.path.join(self.path, 'main'),
 			'--model', self.model_path,
-			'-n', '256',
+			'-n', '4096',
 			'--repeat_penalty', '1',
 			'-t', '8',
-			'--top_k', '40',
-			'--top_p', '0.95',
-			'--temp', '0.1',
-			'--repeat_last_n', '64',
-			'--repeat_penalty', '1.3',
 		]
 
 		if self.keep_in_memory is True:
 			command = self.command + ['-ins']
 			command = command + ['-p', '"Below is an instruction that describes a task. Write a response that appropriately completes the request."']
 
-			print('Waiting for Alpaca to start...')
+			print('Waiting for Vicuna to start...')
 			self.process = pexpect.spawn(' '.join(command))
 			self._wait_for_prompt()
-			print('Alpaca started!')
+			print('Vicuna started!')
 
 	def _wait_for_prompt(self):
 		self.process.expect('\n> ', timeout=None)
@@ -64,7 +59,7 @@ class AlpacaAnswer(BaseAnswer):
 			prompt = self.no_context_prompt(query)
 
 		if self.keep_in_memory is True:
-			# Send prompt to Alpaca process
+			# Send prompt to Vicuna process
 			self.process.sendline(prompt)
 			self._wait_for_prompt()
 			response = self.process.before.decode('utf-8')
@@ -83,6 +78,11 @@ class AlpacaAnswer(BaseAnswer):
 
 		# Remove prompt from response
 		response = response.replace(prompt, '', 1).strip(' \n\n')
+
+		# Clean
+		response = response.replace("\r\n", "\n")
+		response = response.replace("\r", "\n")
+		response = response.strip()
 
 		return {
 			'query': query,

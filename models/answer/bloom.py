@@ -21,10 +21,14 @@ class BloomAnswer(BaseAnswer):
 	def create_prompt(self, query: str, context: list[str]) -> str:
 		return self.get_prompt_template().format(query_str=query, context_str='\n'.join(context))
 
-	def answer(self, query: str, context: list[str] = None):
-		if context is None:
-			context = self.index.sources(query, 1)
-		prompt = self.create_prompt(query, context)
+	def answer(self, query: str, context: list[str] = None, use_context: bool = False):
+		if use_context:
+			if context is None:
+				context = self.index.sources(query, 1)
+			prompt = self.create_prompt(query, context)
+		else:
+			context = []
+			prompt = query
 
 		process = subprocess.Popen(
 			[

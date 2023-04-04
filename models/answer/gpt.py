@@ -1,17 +1,16 @@
-from llama_index import QuestionAnswerPrompt
 import openai
 from models.answer.base import BaseAnswer
 from models.index.base import BaseIndex
 
 
 class GPTAnswer(BaseAnswer):
-	def __init__(self, model: str, index: BaseIndex):
-		super().__init__(model, index)
+	def __init__(self, model: str, index: BaseIndex, name: str):
+		super().__init__(name, model, index)
 
-		# QA prompt
-		self.qa_prompt = QuestionAnswerPrompt(self.get_prompt_template())
+	def no_context_prompt(self, query: str) -> str:
+		return query
 
-	def get_prompt_template(self) -> str:
+	def context_prompt(self, query: str, context: list[str]) -> str:
 		return (
 			"We have provided context information below.\n"
 			"---------------------\n"
@@ -21,15 +20,16 @@ class GPTAnswer(BaseAnswer):
 			"---------------------\n"
 			"{query_str}\n"
 			"---------------------\n"
-		)
+		).format(query_str=query, context_str='\n'.join(context))
 
-	def create_prompt(self, query: str, context: list[str]) -> str:
-		return self.get_prompt_template().format(query_str=query, context_str='\n'.join(context))
-
-	def answer(self, query: str, context: list[str] = None):
-		if context is None:
-			context = self.index.sources(query, 1)
-		prompt = self.create_prompt(query, context)
+	def answer(self, query: str, context: list[str] = None, use_context: bool = False):
+		if use_context:
+			if context is None:
+				context = self.index.sources(query, 1)
+			prompt = self.context_prompt(query, context)
+		else:
+			context = []
+			prompt = self.no_context_prompt(query)
 
 		response = openai.ChatCompletion.create(
 			model = self.model,

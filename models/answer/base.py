@@ -3,15 +3,16 @@ from models.index.base import BaseIndex
 
 
 class BaseAnswer:
-	def __init__(self, model: str, index: BaseIndex):
+	def __init__(self, name: str, model: str, index: BaseIndex):
+		self.name = name
 		self.model = model
 		self.index = index
 
-	def get_prompt_template(self) -> str:
+	def no_context_prompt(self, query: str) -> str:
 		raise NotImplementedError
 
-	def create_prompt(self, query: str) -> str:
+	def context_prompt(self, query: str, context: list[str]) -> str:
 		raise NotImplementedError
 
-	def answer(self, query: str):
+	def answer(self, query: str, context: list[str] = None, use_context: bool = False):
 		raise NotImplementedError

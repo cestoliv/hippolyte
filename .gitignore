@@ -2,6 +2,7 @@ indexes/
 trials/
 
 .env
+queries.db
 
 __pycache__/
 venv
