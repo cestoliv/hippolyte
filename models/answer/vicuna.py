@@ -27,10 +27,12 @@ class VicunaAnswer(BaseAnswer):
 			command = self.command + ['-ins']
 			command = command + ['-p', '"Below is an instruction that describes a task. Write a response that appropriately completes the request."']
 
-			print('Waiting for Vicuna to start...')
+			if os.environ.get('VERBOSE').lower() == 'true':
+				print(Fore.BLUE + Style.BRIGHT + 'Starting Vicuna' + Style.RESET_ALL)
 			self.process = pexpect.spawn(' '.join(command))
 			self._wait_for_prompt()
-			print('Vicuna started!')
+			if os.environ.get('VERBOSE').lower() == 'true':
+				print(Fore.BLUE + Style.BRIGHT + 'Vicuna started' + Style.RESET_ALL)
 
 	def _wait_for_prompt(self):
 		self.process.expect('\n> ', timeout=None)

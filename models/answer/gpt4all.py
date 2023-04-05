@@ -18,19 +18,24 @@ class GPT4AllAnswer(BaseAnswer):
 		self.command = [
 			os.path.join(self.path, 'main'),
 			'--model', self.model_path,
-			'-n', '4096',
-			'--repeat_penalty', '1',
+			'-n', '512',
 			'-t', '8',
+			'--top_k', '40',
+			'--top_p', '0.95',
+			'--repeat_last_n', '64',
+			'--repeat_penalty', '1.3',
 		]
 
 		if self.keep_in_memory is True:
 			command = self.command + ['-ins']
 			command = command + ['-p', '"Below is an instruction that describes a task. Write a response that appropriately completes the request."']
 
-			print('Waiting for GPT4All to start...')
+			if os.environ.get('VERBOSE').lower() == 'true':
+				print(Fore.BLUE + Style.BRIGHT + 'Starting GPT4All' + Style.RESET_ALL)
 			self.process = pexpect.spawn(' '.join(command))
 			self._wait_for_prompt()
-			print('GPT4All started!')
+			if os.environ.get('VERBOSE').lower() == 'true':
+				print(Fore.BLUE + Style.BRIGHT + 'GPT4All started' + Style.RESET_ALL)
 
 	def _wait_for_prompt(self):
 		self.process.expect('\n> ', timeout=None)

@@ -16,7 +16,7 @@ from pygments.formatters import html
 # Local imports
 from models.answer.alpaca import AlpacaAnswer
 from models.answer.bloom import BloomAnswer
-from models.answer.functions import get_models
+from models.functions import get_models
 from models.answer.gpt import GPTAnswer
 from models.answer.gpt4all import GPT4AllAnswer
 from models.answer.vicuna import VicunaAnswer

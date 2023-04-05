@@ -20,8 +20,8 @@ import readline
 from dotenv import load_dotenv
 
 # local imports
-from prompt import create_prompt, QA_PROMPT
-from index import create_index, load_index
+from models.answer.base import BaseAnswer
+from models.functions import get_index, get_models
 from openapi import check_openai_api_key
 
 
@@ -30,44 +30,26 @@ console = Console()
 # Load environment variables
 load_dotenv()
 ASSISTANT_NAME = os.getenv('ASSISTANT_NAME') or 'Hippolyte'
-VERBOSE = os.getenv('VERBOSE') or False
-MODEL = os.getenv('MODEL') or 'gpt-3.5-turbo'
+VERBOSE = os.getenv('VERBOSE').lower() == 'true'
 
 DOCUMENTS_PATH = os.getenv('DOCUMENTS_PATH')
-if not DOCUMENTS_PATH:
-	print(Fore.RED + Style.BRIGHT + 'No DOCUMENTS_PATH found in .env file' + Style.RESET_ALL)
-	exit(1)
-
-# Check if documents path exists, is a directory and is not empty
-if not exists(DOCUMENTS_PATH):
-	print(Fore.RED + Style.BRIGHT + DOCUMENTS_PATH + ' does not exist' + Style.RESET_ALL)
-	exit(1)
-elif not os.path.isdir(DOCUMENTS_PATH):
-	print(Fore.RED + Style.BRIGHT + DOCUMENTS_PATH + ' is not a directory' + Style.RESET_ALL)
-	exit(1)
-elif not os.listdir(DOCUMENTS_PATH):
-	print(Fore.RED + Style.BRIGHT + DOCUMENTS_PATH + ' is empty' + Style.RESET_ALL)
-	exit(1)
-
-# check openai api key
-check_openai_api_key(os.getenv('OPENAI_API_KEY'))
-
-# Set global variables
-INDEX_PATH = 'indexes/index_GPTSimpleVectorIndex.json'
 
 # Load or create index
 index = None
-if exists(INDEX_PATH):
-	# Load from disk
-	with console.status(Fore.BLUE + Style.BRIGHT + ASSISTANT_NAME + ' loading...' + Style.RESET_ALL, spinner='bouncingBar', spinner_style='blue') as status:
-		index = load_index(INDEX_PATH, MODEL)
-else:
-	# Create and save to disk
-	with console.status(Fore.BLUE + Style.BRIGHT + 'Creating index (can take a lot of time)' + Style.RESET_ALL, spinner='bouncingBar', spinner_style='blue') as status:
-		index = create_index(DOCUMENTS_PATH, INDEX_PATH, MODEL)
+with console.status(Fore.BLUE + Style.BRIGHT + 'Loading index...' + Style.RESET_ALL, spinner='bouncingBar', spinner_style='blue') as status:
+	index = get_index(DOCUMENTS_PATH)
+
+# Load models
+models = {}
+with console.status(Fore.BLUE + Style.BRIGHT + 'Loading models...' + Style.RESET_ALL, spinner='bouncingBar', spinner_style='blue') as status:
+	models = get_models(index)
+
+if len(models) == 0:
+	print(Fore.RED + Style.BRIGHT + 'No models configured. Please check your configuration.' + Style.RESET_ALL)
+	exit(1)
+model: BaseAnswer = models[next(iter(models))]
 
 print(Fore.BLUE + Style.BRIGHT + ASSISTANT_NAME + ' is ready!' + Style.RESET_ALL)
-
 
 # Print menu
 console.print(Markdown('''
@@ -75,6 +57,8 @@ You can start questioning %s.
 Here are the available orders:
 - `exit` or `quit` => Say goodbye to %s
 - `index` => Recreate the index (to take into account changes in your documents)
+- `models` => List available models
+- `model <model_name>` => Select a model
 ''' % (ASSISTANT_NAME, ASSISTANT_NAME)))
 
 
@@ -93,16 +77,35 @@ while True:
 		if confirmation.lower() == "y":
 			# Re-create index
 			with console.status(Fore.BLUE + Style.BRIGHT + 'Creating index (can take a lot of time)' + Style.RESET_ALL, spinner='bouncingBar', spinner_style='blue') as status:
-				index = create_index(DOCUMENTS_PATH, INDEX_PATH, MODEL)
+				index.create_index()
+	elif text == "models":
+		# List available models
+		models_list = []
+		for model_name in models.keys():
+			line = '- `' + model_name + '`'
+			if model_name == model.model:
+				line += ' *used*'
+			models_list.append(line)
+
+		console.print(Markdown('Available models:\n'
+			+ '\n'.join(models_list)
+			+ '\n'
+		))
+		continue
+	elif text.startswith("model "):
+		# Select a model
+		model_name = text[6:]
+		if model_name not in models:
+			print(Fore.RED + Style.BRIGHT + 'Model ' + model_name + ' does not exist or is not configured.' + Style.RESET_ALL)
+		else:
+			model = models[model_name]
+			print(Fore.BLUE + Style.BRIGHT + 'Model ' + model.model + ' selected.' + Style.RESET_ALL)
+		continue
 
 	response = ''
 	with console.status("", spinner='point', spinner_style='blue') as status:
-		response = index.query(text, text_qa_template=QA_PROMPT)
-
-	# To see the prompt:
-	# print(create_prompt(text, find_relevant_sources(text, index, top_k=1)))
+		answer = model.answer(text, use_context=True)
+		response = answer['answer']
 
 	markdown = Markdown(str(response))
-
-	print(Fore.BLUE + Style.BRIGHT + '< ' + ASSISTANT_NAME + Style.RESET_ALL)
 	console.print(markdown)

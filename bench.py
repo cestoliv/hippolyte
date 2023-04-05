@@ -13,13 +13,14 @@ from models.answer.alpaca import AlpacaAnswer
 from models.answer.bloom import BloomAnswer
 from models.answer.gpt import GPTAnswer
 from models.answer.gpt4all import GPT4AllAnswer
-from models.answer.functions import get_models
+from models.functions import get_index, get_models
 from models.index.gsvindex import GSVIndex
 
 load_dotenv()
 
 if __name__ == '__main__':
-	index = GSVIndex('text-embedding-ada-002')
+	index = get_index()
+	models = get_models(index)
 
 	bench_questions = [
 		{
@@ -59,15 +60,6 @@ if __name__ == '__main__':
 			'context': [] # Will use the index
 		},
 	]
-
-	# models = {
-	# 	# 'gpt': GPTAnswer('gpt-3.5-turbo', index),
-	# 	'alpaca': AlpacaAnswer(index, '/home/cestoliv/Downloads/llama.cpp/'),
-	# 	'gpt4all': GPT4AllAnswer(index, '/home/cestoliv/Downloads/gpt4all.cpp/'),
-	# 	# 'bloom': BloomAnswer(index, '/home/cestoliv/Downloads/bloomz.cpp/')
-	# }
-
-	models = get_models(index)
 
 	for question in bench_questions:
 		print('Question: ' + question['question'])
