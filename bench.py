@@ -9,12 +9,7 @@ logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 from dotenv import load_dotenv
 from pprint import pprint
 
-from models.answer.alpaca import AlpacaAnswer
-from models.answer.bloom import BloomAnswer
-from models.answer.gpt import GPTAnswer
-from models.answer.gpt4all import GPT4AllAnswer
-from models.functions import get_index, get_models
-from models.index.gsvindex import GSVIndex
+from src.functions import get_index, get_models
 
 load_dotenv()
 
@@ -67,18 +62,26 @@ if __name__ == '__main__':
 			if len(question['context']) > 0:
 				print('Context: ' + '\n'.join(question['context']))
 			else:
-				print('Context: ' + '\n'.join(index.sources(question['question'], 1)))
+				print('Context: ' + '\n'.join(c["content"] for c in index.sources(question['question'], 1)))
 		print()
 
 		for model_name, model in models.items():
-			print('\t Asking ' + model.name)
+			print('\t Asking ' + model.model["name"])
 
 			context = None
 			use_context = False
 			if question['context'] is not None:
 				if len(question['context']) > 0:
-					context = question['context']
+					context = []
+					for c in question['context']:
+						context.append({
+							'document_id': None,
+							'content': c,
+							'similarity': None,
+						})
 				use_context = True
+
+			# TODO: Print response time
 
 			print(model.answer(question['question'], context, use_context=use_context)['answer'])
 			print()

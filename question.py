@@ -15,13 +15,11 @@ from colorama import Fore, Style
 
 # other imports
 import os
-from os.path import exists
-import readline
 from dotenv import load_dotenv
 
 # local imports
-from models.answer.base import BaseAnswer
-from models.functions import get_index, get_models
+from src.answer.base_answer import BaseAnswer
+from src.functions import get_index, get_models
 from openapi import check_openai_api_key
 
 
@@ -30,17 +28,15 @@ console = Console()
 # Load environment variables
 load_dotenv()
 ASSISTANT_NAME = os.getenv('ASSISTANT_NAME') or 'Hippolyte'
-VERBOSE = os.getenv('VERBOSE').lower() == 'true'
-
-DOCUMENTS_PATH = os.getenv('DOCUMENTS_PATH')
+VERBOSE = os.getenv('VERBOSE', 'false').lower() == 'true'
 
 # Load or create index
 index = None
 with console.status(Fore.BLUE + Style.BRIGHT + 'Loading index...' + Style.RESET_ALL, spinner='bouncingBar', spinner_style='blue') as status:
-	index = get_index(DOCUMENTS_PATH)
+	index = get_index()
 
 # Load models
-models = {}
+models: dict[str, BaseAnswer] = {}
 with console.status(Fore.BLUE + Style.BRIGHT + 'Loading models...' + Style.RESET_ALL, spinner='bouncingBar', spinner_style='blue') as status:
 	models = get_models(index)
 
@@ -51,22 +47,38 @@ model: BaseAnswer = models[next(iter(models))]
 
 print(Fore.BLUE + Style.BRIGHT + ASSISTANT_NAME + ' is ready!' + Style.RESET_ALL)
 
-# Print menu
-console.print(Markdown('''
-You can start questioning %s.
-Here are the available orders:
+HELP = '''
 - `exit` or `quit` => Say goodbye to %s
 - `index` => Recreate the index (to take into account changes in your documents)
 - `models` => List available models
 - `model <model_name>` => Select a model
-''' % (ASSISTANT_NAME, ASSISTANT_NAME)))
+- `search` => Toggle search only mode (no answer generation)
+''' % ASSISTANT_NAME
 
+# Print menu
+console.print(Markdown('''
+You can start questioning %s.
+Here are the available orders:
+- `help` => Show this help
+%s
+''' % (ASSISTANT_NAME, HELP)))
+
+searchOnly = False
 
 while True:
-	print(Fore.GREEN + Style.BRIGHT)
-	text = input("> ")
-	print(Style.RESET_ALL)
+	text = input(
+		'\n'
+		+ Fore.LIGHTMAGENTA_EX
+		+ ('[search] ' if searchOnly else '[%s] ' % model.model['id'])
+		+ Style.RESET_ALL
+		+ Fore.GREEN + Style.BRIGHT + '> ' + Style.RESET_ALL
+	)
+	print()
+
 	if text.strip() == '':
+		continue
+	elif text == "help":
+		console.print(Markdown('Here are the available orders:\n%s' % HELP))
 		continue
 	elif text == "quit" or text == "exit":
 		print(Fore.BLUE + Style.BRIGHT + ASSISTANT_NAME + ' is shutting down...' + Style.RESET_ALL)
@@ -78,6 +90,7 @@ while True:
 			# Re-create index
 			with console.status(Fore.BLUE + Style.BRIGHT + 'Creating index (can take a lot of time)' + Style.RESET_ALL, spinner='bouncingBar', spinner_style='blue') as status:
 				index.create_index()
+		continue
 	elif text == "models":
 		# List available models
 		models_list = []
@@ -101,11 +114,28 @@ while True:
 			model = models[model_name]
 			print(Fore.BLUE + Style.BRIGHT + 'Model ' + model.model + ' selected.' + Style.RESET_ALL)
 		continue
+	elif text == "search":
+		searchOnly = not searchOnly
+		print(Fore.BLUE + Style.BRIGHT + 'Search only mode is now ' + ('enabled' if searchOnly else 'disabled') + '.' + Style.RESET_ALL)
+		continue
 
-	response = ''
-	with console.status("", spinner='point', spinner_style='blue') as status:
-		answer = model.answer(text, use_context=True)
-		response = answer['answer']
+	if searchOnly:
+		with console.status("", spinner='point', spinner_style='blue') as status:
+			results = index.sources(text)
+			if len(results) == 0:
+				print(Fore.YELLOW + Style.BRIGHT + 'No results.' + Style.RESET_ALL)
+			else:
+				for r in range(len(results)):
+					print(Fore.CYAN + Style.BRIGHT + 'n°' + str(r+1) + Style.RESET_ALL + ' ' + results[r]['document_id'], end='')
+					if results[r]['similarity']:
+						print(Fore.CYAN + Style.BRIGHT + ' similarity: ' + str(round(results[r]['similarity'], 3)) + Style.RESET_ALL, end='')
+					print()
+					print(results[r]['content'])
+					print()
+	else:
+		with console.status("", spinner='point', spinner_style='blue') as status:
+			answer = model.answer(text, use_context=True, top_k=1)
+			response = answer['answer']
 
-	markdown = Markdown(str(response))
-	console.print(markdown)
+		markdown = Markdown(str(response))
+		console.print(markdown)
