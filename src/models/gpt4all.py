@@ -24,6 +24,16 @@ gpt4all = Model(
 		"### Response:"
 	).format(query_str=query, context_str='\n'.join([c['content'] for c in context])),
 
+	extractor_prompt=lambda query, context:
+	(
+		"""Use the following pieces of context to find any informations that can help answering the question at the end. If you don't know the answer, just say "NONE", don't try to make up an answer. Make a bullet point list.
+
+		{context}
+
+		Question: {query}
+		Helpful Answer:"""
+	).format(query=query, context=context),
+
 	clear_answer=lambda answer: answer.strip(' \n\t'),
 )
 
@@ -34,6 +44,7 @@ def getGpt4All_LlamaCpp(model_path: str) -> LLamaModel:
 		context_size=gpt4all["context_size"],
 		no_context_prompt=gpt4all["no_context_prompt"],
 		context_prompt=gpt4all["context_prompt"],
+		extractor_prompt=gpt4all["extractor_prompt"],
 		clear_answer=gpt4all["clear_answer"],
 
 		model_path=model_path,

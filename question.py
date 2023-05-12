@@ -38,7 +38,7 @@ with console.status(Fore.BLUE + Style.BRIGHT + 'Loading index...' + Style.RESET_
 # Load models
 models: dict[str, BaseAnswer] = {}
 with console.status(Fore.BLUE + Style.BRIGHT + 'Loading models...' + Style.RESET_ALL, spinner='bouncingBar', spinner_style='blue') as status:
-	models = get_models(index)
+	models = get_models()
 
 if len(models) == 0:
 	print(Fore.RED + Style.BRIGHT + 'No models configured. Please check your configuration.' + Style.RESET_ALL)
@@ -119,22 +119,23 @@ while True:
 		print(Fore.BLUE + Style.BRIGHT + 'Search only mode is now ' + ('enabled' if searchOnly else 'disabled') + '.' + Style.RESET_ALL)
 		continue
 
+	context = index.sources(text)
+
 	if searchOnly:
 		with console.status("", spinner='point', spinner_style='blue') as status:
-			results = index.sources(text)
-			if len(results) == 0:
+			if len(context) == 0:
 				print(Fore.YELLOW + Style.BRIGHT + 'No results.' + Style.RESET_ALL)
 			else:
-				for r in range(len(results)):
-					print(Fore.CYAN + Style.BRIGHT + 'n°' + str(r+1) + Style.RESET_ALL + ' ' + results[r]['document_id'], end='')
-					if results[r]['similarity']:
-						print(Fore.CYAN + Style.BRIGHT + ' similarity: ' + str(round(results[r]['similarity'], 3)) + Style.RESET_ALL, end='')
+				for r in range(len(context)):
+					print(Fore.CYAN + Style.BRIGHT + 'n°' + str(r+1) + Style.RESET_ALL + ' ' + context[r]['document_id'], end='')
+					if context[r]['similarity']:
+						print(Fore.CYAN + Style.BRIGHT + ' similarity: ' + str(round(context[r]['similarity'] or 0, 3)) + Style.RESET_ALL, end='')
 					print()
-					print(results[r]['content'])
+					print(context[r]['content'])
 					print()
 	else:
 		with console.status("", spinner='point', spinner_style='blue') as status:
-			answer = model.answer(text, use_context=True, top_k=1)
+			answer = model.answer(text, context)
 			response = answer['answer']
 
 		markdown = Markdown(str(response))

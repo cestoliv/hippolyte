@@ -1,42 +1,35 @@
+from colorama import Fore, Style
 import openai
+import time
 
 # local imports
 from src.answer.base_answer import BaseAnswer
-from src.index.base_index import BaseIndex
+from src.chunks import create_chunks
 from src.type import Answer, Model, Source
 
 
 class OpenAIAnswer(BaseAnswer):
-	def __init__(self, model: Model, index: BaseIndex):
-		super().__init__(model, index)
+	def __init__(self, model: Model):
+		super().__init__(model)
+		# TODO: check api key
 
-	def answer(self, query: str, context: list[Source] = [], use_context: bool = False, top_k: int = -1) -> Answer:
-		if use_context:
-			if context is None:
-				if top_k < 0:
-					context = self.index.sources(query)
-				else:
-					context = self.index.sources(query, top_k=top_k)
-			prompt = self.model['context_prompt'](query, context)
-		else:
-			context = []
-			prompt = self.model['no_context_prompt'](query)
-
-		# Shrinking prompt to the lasts 4096 characters
-		if len(prompt) > self.model['context_size']:
-			prompt = prompt[-self.model['context_size']:]
-
-		response = openai.ChatCompletion.create(
-			model = self.model['id'],
-			messages = [
-				{ 'role': 'user', 'content': prompt },
-			]
-		)
-		response = self.model['clear_answer'](response.choices[0].message.content)
-
-		return {
-			'query': query,
-			'context': context,
-			'prompt': prompt,
-			'answer': response,
-		}
+	"""
+		Directly query the model with the given prompt
+	"""
+	def query(self, prompt: str) -> str:
+		while True:
+			try:
+				response = openai.ChatCompletion.create(
+					model = self.model['id'],
+					messages = [
+						{ 'role': 'user', 'content': prompt },
+					]
+				)
+				response = self.model['clear_answer'](response.choices[0].message.content)
+				return response
+			except openai.error.RateLimitError as e:
+				print(Fore.YELLOW + "RateLimitError, retrying in 30 seconds..." + Style.RESET_ALL)
+				time.sleep(30)
+			except Exception as e:
+				print(Fore.YELLOW + "Unknown error, retrying in 30 seconds..." + Style.RESET_ALL)
+				time.sleep(30)

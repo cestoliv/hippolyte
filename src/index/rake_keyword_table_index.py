@@ -3,7 +3,7 @@ import os
 from colorama import Fore, Style
 
 # llama_index imports
-from llama_index import GPTRAKEKeywordTableIndex, StorageContext, load_index_from_storage # type: ignore
+from llama_index import GPTRAKEKeywordTableIndex, StorageContext, ServiceContext, load_index_from_storage # type: ignore
 from llama_index.retrievers import KeywordTableSimpleRetriever # type: ignore
 
 # local imports
@@ -60,9 +60,15 @@ class RAKEKeywordTableIndex(BaseIndex):
 		for source in sources:
 			if len(relevant_sources) >= top_k and top_k != -1:
 				break
+
+			path = None
+			if source.node.extra_info is not None and 'path' in source.node.extra_info:
+				path = source.node.extra_info['path']
+
 			relevant_sources.append({
 				'document_id': source.node.doc_id,
 				'content': source.node.get_text(),
-				'similarity': source.score
+				'similarity': source.score,
+				'path': path,
 			})
 		return relevant_sources

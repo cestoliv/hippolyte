@@ -20,7 +20,7 @@ class LogseqReader(BaseReader):
 
 	def load_data(self, *args: Any, **load_kwargs: Any) -> List[Document]:
 		"""Load data from the input directory."""
-		docs: List[str] = []
+		docs: List[Document] = []
 		for (dirpath, dirnames, filenames) in os.walk(self.input_dir):
 			dirnames[:] = [d for d in dirnames if not d.startswith(".")]
 			for filename in filenames:
@@ -30,14 +30,14 @@ class LogseqReader(BaseReader):
 
 					# Add the filename as the title of the document.
 					if isinstance(content, list):
-						content[0] = 'title:: ' + filename[:-3] + '\n' + content[0]
+						for c in content:
+							# c = 'title:: ' + filename[:-3] + '\n' + c
+							docs.append(Document(c, extra_info={'path': filepath}))
+					else:
+						# content = 'title:: ' + filename[:-3] + '\n' + content
+						docs.append(Document(content, extra_info={'path': filepath}))
 
-					docs.extend(content)
-
-					# Add the filepath in the metadata
-					docs[-1]
-
-		return [Document(d) for d in docs]
+		return docs
 
 	def load_langchain_documents(self, **load_kwargs: Any) -> List[LCDocument]:
 		"""Load data in LangChain document format."""

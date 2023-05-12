@@ -27,6 +27,14 @@ vicuna = Model(
 		"### Assistant:"
 	).format(query_str=query, context_str='\n'.join([c['content'] for c in context])),
 
+	extractor_prompt=lambda query, context:
+	(
+		"{context}\n"
+		"### Human: Extract in this text the information that could help (even if only partially) to answer this. Any information that is not directly related to the question should be excluded. If you do not find any related information, answer \"NONE\". Answer with a JSON object.\n"
+		"Question: {query}\n"
+		"### Assistant:"
+	).format(query=query, context=context),
+
 	clear_answer=lambda answer: answer.strip(' \n\t'),
 )
 
@@ -37,6 +45,7 @@ def getVicuna_LlamaCpp(model_path: str) -> LLamaModel:
 		context_size=vicuna["context_size"],
 		no_context_prompt=vicuna["no_context_prompt"],
 		context_prompt=vicuna["context_prompt"],
+		extractor_prompt=vicuna["extractor_prompt"],
 		clear_answer=vicuna["clear_answer"],
 
 		model_path=model_path,

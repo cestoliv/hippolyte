@@ -17,4 +17,4 @@ rich==13.3.5
 sentencepiece==0.1.98
 SQLAlchemy==2.0.12
 torch==1.13.1
-transformers==4.28.1
+transformers==4.29.0

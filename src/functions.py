@@ -7,6 +7,7 @@ from llama_index import download_loader, SimpleDirectoryReader
 # local imports
 from src.answer.openai_api import OpenAIAnswer
 from src.answer.llama_cpp import LLamaCppAnswer
+from src.answer.huggingface_api import HuggingFaceApiAnswer
 from src.index.base_index import BaseIndex
 from src.answer.base_answer import BaseAnswer
 from src.index.rake_keyword_table_index import RAKEKeywordTableIndex
@@ -20,7 +21,7 @@ from src.models.gpt4 import gpt4
 from src.models.alpaca import getAlpaca_LlamaCpp
 from src.models.gpt4all import getGpt4All_LlamaCpp
 from src.models.vicuna import getVicuna_LlamaCpp
-from src.models.openassistant import getOpenAssistant_LlamaCpp
+from src.models.openassistant import getOpenAssistant_LlamaCpp, openassistant_HuggingFaceApi
 
 from openapi import check_openai_api_key
 
@@ -43,38 +44,39 @@ def env_is_true(env: str):
 	return os_env is not None and os_env.lower() == 'true'
 
 # Function to get a dict of model based on .env
-def get_models(index: BaseIndex) -> dict[str, BaseAnswer]:
+def get_models() -> dict[str, BaseAnswer]:
 	models: dict[str, BaseAnswer] = {}
 
 	# GPT-3.5-turbo
 	if env_is_true('GPT35T_ENABLED'):
 		check_openai_api_key()
-		models['gpt-3.5-turbo'] = OpenAIAnswer(gpt35Turbo, index)
+		models['gpt-3.5-turbo'] = OpenAIAnswer(gpt35Turbo)
 
 	# GPT-4
 	if env_is_true('GPT4_ENABLED'):
 		check_openai_api_key()
-		models['gpt-4'] = OpenAIAnswer(gpt4, index)
+		models['gpt-4'] = OpenAIAnswer(gpt4)
 
 	# Alpaca
 	if env_is_true('ALPACA_ENABLED'):
 		check_envs({'ALPACA_MODEL_PATH': 'path'})
-		models['alpaca'] = LLamaCppAnswer(getAlpaca_LlamaCpp(os.getenv('ALPACA_MODEL_PATH', '')), index)
+		models['alpaca'] = LLamaCppAnswer(getAlpaca_LlamaCpp(os.getenv('ALPACA_MODEL_PATH', '')))
 
 	# GPT4All
 	if env_is_true('GPT4ALL_ENABLED'):
 		check_envs({'GPT4ALL_MODEL_PATH': 'path'})
-		models['gpt4all'] = LLamaCppAnswer(getGpt4All_LlamaCpp(os.getenv('GPT4ALL_MODEL_PATH', '')), index)
+		models['gpt4all'] = LLamaCppAnswer(getGpt4All_LlamaCpp(os.getenv('GPT4ALL_MODEL_PATH', '')))
 
 	# Vicuna
 	if env_is_true('VICUNA_ENABLED'):
 		check_envs({'VICUNA_MODEL_PATH': 'path'})
-		models['vicuna'] = LLamaCppAnswer(getVicuna_LlamaCpp(os.getenv('VICUNA_MODEL_PATH', '')), index)
+		models['vicuna'] = LLamaCppAnswer(getVicuna_LlamaCpp(os.getenv('VICUNA_MODEL_PATH', '')))
 
 	# OpenAssistant
 	if env_is_true('OPENASSISTANT_ENABLED'):
 		check_envs({'OPENASSISTANT_MODEL_PATH': 'path'})
-		models['openassistant'] = LLamaCppAnswer(getOpenAssistant_LlamaCpp(os.getenv('OPENASSISTANT_MODEL_PATH', '')), index)
+		models['openassistant'] = LLamaCppAnswer(getOpenAssistant_LlamaCpp(os.getenv('OPENASSISTANT_MODEL_PATH', '')))
+		# models['openassistant'] = HuggingFaceApiAnswer(openassistant_HuggingFaceApi)
 
 	return models
 
