@@ -32,41 +32,51 @@ openassistant = Model(
 
 	extractor_prompt=lambda query, context:
 	(
-"""<|prompter|>Here is a series of dialogues between various people and an AI assistant specialized in summarization and information extraction. The job of the AI assistant is to extract from a document extract the information allowing to answer the user's question. The AI assistant does not answer the question, it simply gives sources in the form of a bullet list.<|endoftext|>
-
+"""<|system|>Extract in the given document the informations that can help to answer the following question. Answer with a bullet list. Answer "NONE" if the document doesn't contains any related informations.<|endoftext|>
 <|prompter|>
-Question: Matrix, how to fix the file not uploading error?
+{query}
 =====
-Document: type:: [[Documentation]]
-- # Matrix
-	- ## Impossible d'Upload un fichier
-		- `sudo chown -R 991:991 media_store/`
+{context}
 =====
 <|endoftext|>
 <|assistant|>
-- sudo chown -R 991:991 media_store/
-<|endoftext|>
+"""
 
-<|prompter|>
-Question: What are the last books I read?
-=====
-Document: type:: [[Documentation]]
-- # Matrix
-	- ## Impossible d'Upload un fichier
-		- `sudo chown -R 991:991 media_store/`
-=====
-<|endoftext|>
-<|assistant|>
-NONE
-<|endoftext|>
+# """<|prompter|>Here is a series of dialogues between various people and an AI assistant specialized in summarization and information extraction. The job of the AI assistant is to extract from a document extract the information allowing to answer the user's question. The AI assistant does not answer the question, it simply gives sources in the form of a bullet list.<|endoftext|>
 
-<|prompter|>
-Question: {query}
-=====
-Document: {context}
-=====
-<|endoftext|>
-<|assistant|>"""
+# <|prompter|>
+# Question: Matrix, how to fix the file not uploading error?
+# =====
+# Document: type:: [[Documentation]]
+# - # Matrix
+# 	- ## Impossible d'Upload un fichier
+# 		- `sudo chown -R 991:991 media_store/`
+# =====
+# <|endoftext|>
+# <|assistant|>
+# - sudo chown -R 991:991 media_store/
+# <|endoftext|>
+
+# <|prompter|>
+# Question: What are the last books I read?
+# =====
+# Document: type:: [[Documentation]]
+# - # Matrix
+# 	- ## Impossible d'Upload un fichier
+# 		- `sudo chown -R 991:991 media_store/`
+# =====
+# <|endoftext|>
+# <|assistant|>
+# NONE
+# <|endoftext|>
+
+# <|prompter|>
+# Question: {query}
+# =====
+# Document: {context}
+# =====
+# <|endoftext|>
+# <|assistant|>"""
 
 
 		# "{context}\n"

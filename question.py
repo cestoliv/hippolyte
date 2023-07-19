@@ -94,9 +94,9 @@ while True:
 	elif text == "models":
 		# List available models
 		models_list = []
-		for model_name in models.keys():
-			line = '- `' + model_name + '`'
-			if model_name == model.model:
+		for model_id in models.keys():
+			line = '- `' + model_id + '`'
+			if model_id == model.model['id']:
 				line += ' *used*'
 			models_list.append(line)
 
@@ -107,12 +107,12 @@ while True:
 		continue
 	elif text.startswith("model "):
 		# Select a model
-		model_name = text[6:]
-		if model_name not in models:
-			print(Fore.RED + Style.BRIGHT + 'Model ' + model_name + ' does not exist or is not configured.' + Style.RESET_ALL)
+		model_id = text[6:]
+		if model_id not in models:
+			print(Fore.RED + Style.BRIGHT + 'Model ' + model_id + ' does not exist or is not configured.' + Style.RESET_ALL)
 		else:
-			model = models[model_name]
-			print(Fore.BLUE + Style.BRIGHT + 'Model ' + model.model + ' selected.' + Style.RESET_ALL)
+			model = models[model_id]
+			print(Fore.BLUE + Style.BRIGHT + 'Model ' + model.model['name'] + ' selected.' + Style.RESET_ALL)
 		continue
 	elif text == "search":
 		searchOnly = not searchOnly
@@ -136,7 +136,18 @@ while True:
 	else:
 		with console.status("", spinner='point', spinner_style='blue') as status:
 			answer = model.answer(text, context)
-			response = answer['answer']
 
+			def escape_spaces_in_path(path: str) -> str:
+				return path.replace(' ', '\\ ')
+
+			# print sources
+			if len(answer['context']) > 0:
+				console.print(Markdown('**Sources used:**\n'
+					+ '\n'.join(['- ' + '{0: <9}'.format("**" + str(round(source["similarity"] or 0, 3)) + "**") + '  ' + escape_spaces_in_path(source['path']) for source in answer['context']])
+				))
+			else:
+				console.print(Markdown('**No sources used.**'))
+			console.print()
+			response = answer['answer']
 		markdown = Markdown(str(response))
 		console.print(markdown)

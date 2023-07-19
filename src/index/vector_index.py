@@ -60,8 +60,8 @@ class VectorIndex(BaseIndex):
 				path = source.node.extra_info['path']
 
 			relevant_sources.append({
-				'document_id': source.node.doc_id,
-				'content': source.node.get_text(),
+				'document_id': source.node.id_,
+				'content': source.node.text,
 				'similarity': source.score,
 				'path': path,
 			})

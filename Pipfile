@@ -1,0 +1,31 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+colorama = "*"
+fastapi = "*"
+langchain = "*"
+llama-index = "*"
+llama-cpp-python = "*"
+mistune = "*"
+nltk = "*"
+openai = "*"
+pexpect = "*"
+pillow = "*"
+protobuf = "*"
+pygments = "*"
+python-dotenv = "*"
+rake-nltk = "*"
+requests = "*"
+rich = "*"
+sentencepiece = "*"
+sqlalchemy = "*"
+torch = "*"
+transformers = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"

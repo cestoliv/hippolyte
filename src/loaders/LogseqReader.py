@@ -4,7 +4,7 @@ from typing import Any, List
 
 from langchain.docstore.document import Document as LCDocument
 from llama_index.readers.base import BaseReader
-from llama_index.readers.file.markdown_parser import MarkdownParser
+from llama_index.readers.file.markdown_reader import MarkdownReader
 from llama_index.readers.schema.base import Document
 
 
@@ -26,16 +26,16 @@ class LogseqReader(BaseReader):
 			for filename in filenames:
 				if filename.endswith(".md"):
 					filepath = os.path.join(dirpath, filename)
-					content = MarkdownParser().parse_file(Path(filepath))
+					content = MarkdownReader().load_data(Path(filepath))
 
 					# Add the filename as the title of the document.
 					if isinstance(content, list):
 						for c in content:
 							# c = 'title:: ' + filename[:-3] + '\n' + c
-							docs.append(Document(c, extra_info={'path': filepath}))
+							docs.append(Document(text=c.text, extra_info={'path': filepath}))
 					else:
 						# content = 'title:: ' + filename[:-3] + '\n' + content
-						docs.append(Document(content, extra_info={'path': filepath}))
+						docs.append(Document(text=c.text, extra_info={'path': filepath}))
 
 		return docs
 

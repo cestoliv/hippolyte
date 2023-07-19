@@ -35,5 +35,13 @@ gpt35Turbo = Model(
 		"### Question: {query}"
 	).format(query=query, context=context),
 
+	history_prompt=lambda query, history:
+	(
+		"You are Hippolyte, an AI language model. You are tasked with answering questions using the given information. "
+		"\n{history_str}"
+		"User: {query}\n"
+		"Assistant: "
+	).format(query=query, history_str='\n'.join([f"User: {h['user']}\nAssistant: {h['assistant']}\n" for h in history])),
+
 	clear_answer=lambda answer: answer.strip(' \n\t'),
 )

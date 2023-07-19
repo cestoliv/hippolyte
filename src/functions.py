@@ -21,6 +21,7 @@ from src.models.gpt4 import gpt4
 from src.models.alpaca import getAlpaca_LlamaCpp
 from src.models.gpt4all import getGpt4All_LlamaCpp
 from src.models.vicuna import getVicuna_LlamaCpp
+from src.models.llama2 import getLlama2_LlamaCpp
 from src.models.openassistant import getOpenAssistant_LlamaCpp, openassistant_HuggingFaceApi
 
 from openapi import check_openai_api_key
@@ -77,6 +78,11 @@ def get_models() -> dict[str, BaseAnswer]:
 		check_envs({'OPENASSISTANT_MODEL_PATH': 'path'})
 		models['openassistant'] = LLamaCppAnswer(getOpenAssistant_LlamaCpp(os.getenv('OPENASSISTANT_MODEL_PATH', '')))
 		# models['openassistant'] = HuggingFaceApiAnswer(openassistant_HuggingFaceApi)
+
+	# LLama2
+	if env_is_true('LLAMA2_ENABLED'):
+		check_envs({'LLAMA2_MODEL_PATH': 'path'})
+		models['llama2'] = LLamaCppAnswer(getLlama2_LlamaCpp(os.getenv('LLAMA2_MODEL_PATH', '')))
 
 	return models
 

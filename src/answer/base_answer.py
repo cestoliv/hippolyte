@@ -28,10 +28,10 @@ class BaseAnswer:
 			# print(self.model["extractor_prompt"](query, chunk['content']))
 			extracted = self.query(self.model["extractor_prompt"](query, chunk['content']))
 
-			# print("Extracted:", extracted)
-
 			# TODO: make this a model function
-			if extracted.startswith('NONE') or '"answer": "none"' in extracted.lower():
+			if (extracted.strip().lower().startswith('none') or
+				'"answer": "none"' in extracted.lower() or
+				'answer: none' in extracted.lower()):
 				continue
 
 			sources.append({
@@ -47,12 +47,14 @@ class BaseAnswer:
 		Ask the model to answer the query with the given context
 		If the context is None, the no_context_prompt will be used
 	"""
-	def answer(self, query: str, context: list[Source] | None = None) -> Answer:
+	def answer(self, query: str, context: list[Source] | None = None, history: list | None = None) -> Answer:
 		prompt = ''
-		if context is None:
+		if context is None and history is None:
 			prompt = self.model['no_context_prompt'](query)
-		else:
+		elif context is not None and history is None:
 			prompt = self.model['context_prompt'](query, context)
+		elif context is None and history is not None:
+			prompt = self.model['history_prompt'](query, history)
 
 		# Shrinking prompt to the lasts 4096 characters
 		# TODO: improve this

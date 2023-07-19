@@ -20,6 +20,7 @@ class Model(TypedDict):
 	no_context_prompt: Callable[[str], str]
 	context_prompt: Callable[[str, List[Source]], str]
 	extractor_prompt: Callable[[str, str], str]
+	history_prompt: Callable[[str, List[str]], str]
 	clear_answer: Callable[[str], str]
 
 class LLamaModel(Model):

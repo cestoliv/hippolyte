@@ -27,6 +27,10 @@ class HuggingFaceApiAnswer(BaseAnswer):
 				"inputs": prompt,
 				"parameters": {
 					"max_new_tokens": 1024,
+					"temperature": 0.1,
+					"repetition_penalty": 1.2,
+					"top_p": 0.95,
+					"top_k": 50,
 				},
 			})
 			if response.status_code == 503:
